@@ -15,7 +15,7 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Move LeetCode
+      - name: Move solutions
         shell: bash
         run: |
           echo "Current directory contents:"
@@ -52,7 +52,7 @@ jobs:
             echo "No matching directories found to move"
           fi
 
-      - name: Move LeetCode
+      - name: Commit & Push changes
         run: |
           if git status --porcelain | grep .; then
             git config --global user.name 'github-actions[bot]'
