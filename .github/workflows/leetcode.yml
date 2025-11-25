@@ -1,5 +1,8 @@
 name: Clean up LeetCode data
 
+permissions:
+  contents: write
+
 on:
   workflow_dispatch:
   push:
