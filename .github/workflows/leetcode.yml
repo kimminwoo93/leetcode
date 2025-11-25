@@ -1,0 +1,65 @@
+name: Clean up LeetCode data
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "[0-9] [0-9] [0-9] [0-9]-*/**"
+
+jobs:
+  move-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Move LeetCode
+        shell: bash
+        run: |
+          echo "Current directory contents:"
+          ls -la
+
+          mkdir -p LeetCode
+          shopt -s nullglob
+
+          moved=0
+          for d in [0-9][0-9][0-9][0-9]-*/; do
+            echo "Processing directory: $d"
+
+            # 언어별 디렉터리 경로
+            mkdir -p LeetCode/TypeScript
+
+            # 언어별 확장자 매핑
+            for f in "$d"*; do
+                case "$f" in
+                    *.ts) lang="TypeScript" ;;
+                esac
+
+                mkdir -p "LeetCode/$lang/$d"
+                echo "Moving $f -> LeetCode/$lang/$d"
+                mv "$f" "LeetCode/$lang/$d"
+            done
+
+            # 원래 문제 폴더 비어있으면 삭제
+            rmdir "$d" || true
+
+            moved=1
+          done
+
+          if [ $moved -eq 0 ]; then
+            echo "No matching directories found to move"
+          fi
+
+      - name: Move LeetCode
+        run: |
+          if git status --porcelain | grep .; then
+            git config --global user.name 'github-actions[bot]'
+            git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+            git add -A
+            git commit -m "chore: Move and sort LeetCode solutions by language"
+            git push
+          else
+            echo "No changes to commit"
+          fi
